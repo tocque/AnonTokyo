@@ -71,6 +71,9 @@ export class AnonTokyoIterator {
     }
 }
 
+/**
+ * 执行上下文，每次执行 Executable 都会生成一个上下文，上下文被设计为可序列化的。
+ */
 export class AnonTokyoExecutionContext {
 
     private callStack: AnonTokyoIterator[] = [];
@@ -83,7 +86,7 @@ export class AnonTokyoExecutionContext {
     }
 
     callByName(name: string, parameters: Record<string, any>) {
-        const executable = this.interpreter.findGlobalFunction(name);
+        const executable = this.interpreter.getGlobalFunction(name);
         return this.call(executable, parameters);
     }
 
@@ -100,6 +103,9 @@ export class AnonTokyoExecutionContext {
     }
 }
 
+/**
+ * 可执行的函数
+ */
 export class AnonTokyoExecutable {
 
     constructor(
@@ -120,6 +126,9 @@ export class AnonTokyoExecutable {
     }
 }
 
+/**
+ * 解释器，可以将事件编译为 `Executable` 或者立即执行
+ */
 export class AnonTokyoInterpreter {
 
     private readonly builtInFunctionMap: Map<string, BuiltInFunction>;
@@ -135,7 +144,7 @@ export class AnonTokyoInterpreter {
         return new Map<string, AnonTokyoExecutable>(globalFunctions.map(([name, script]) => [name, this.compile(script)]));
     }
 
-    findGlobalFunction(name: string) {
+    getGlobalFunction(name: string) {
         const executable = this.globalFunctionMap.get(name);
         if (!executable) {
             throw `missing global function "${name}"`;
@@ -159,6 +168,11 @@ export class AnonTokyoInterpreter {
         return func.func(parameters, env);
     }
 
+    /**
+     * 将指令编译为可执行的类
+     * @param script 
+     * @returns 
+     */
     compile(script: Statement[]): AnonTokyoExecutable {
         const program = compile(script, (name) => {
             return this.getBuiltInFunction(name);
@@ -166,6 +180,13 @@ export class AnonTokyoInterpreter {
         return new AnonTokyoExecutable(program, this);
     }
 
+    /**
+     * 直接执行一组指令
+     * @param script 指令数组
+     * @param parameters 参数
+     * @param env 环境
+     * @returns 
+     */
     exec(script: Statement[], parameters: Record<string, any>, env: Record<string, any>) {
         const executable = this.compile(script);
         return executable.exec(parameters, env);

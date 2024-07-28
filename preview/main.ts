@@ -42,7 +42,7 @@ const executable = testLang.compile([
     {
         type: StatementType.Loop,
         initializer: ({ local }) => local.i = 0,
-        condition: ({ local }) => local.i < 5000,
+        condition: ({ local }) => local.i < 5000000,
         iterator: ({ local }) => local.i++,
         body: [
             {

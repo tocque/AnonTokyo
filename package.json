@@ -1,7 +1,7 @@
 {
   "name": "anon-tokyo",
   "description": "high performence interpreter",
-  "version": "0.0.0-alpha.0",
+  "version": "0.1.1",
   "type": "module",
   "license": "BSD-3-Clause",
   "repository": {

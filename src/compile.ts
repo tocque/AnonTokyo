@@ -246,9 +246,9 @@ export const flowAnalyzePass = (program: Block): BlockFlowNode => {
 
 const emitJITExpression = (expression: Expression) => {
     const code = expression.toString();
-    const [parameterList, rawBody] = code.split("=>");
-    const body = rawBody.trim();
-    return `(${body})`;
+    // const [parameterList, rawBody] = code.split("=>");
+    // const body = rawBody.trim();
+    return `(${code})(scope)`;
 };
 
 export const nodeGenPass = (program: BlockFlowNode, getBuiltInFunction: (name: string) => BuiltInFunction): ExecutionNode[] => {
@@ -278,7 +278,7 @@ export const nodeGenPass = (program: BlockFlowNode, getBuiltInFunction: (name: s
                             const value = `${isFunction(v) ? emitJITExpression(v) : v}`;
                             return `"${k}": ${value}`;
                         }).join(",");
-                        return `${prefix}helper.builtIn.${statement.functionName}({${parameterListCode}}, env);`;
+                        return `${prefix}helper.builtIn.${statement.functionName}({${parameterListCode}}, scope.env);`;
                     }
                 }
                 case FlowNodeType.ExternCall: {
@@ -348,7 +348,7 @@ export const nodeGenPass = (program: BlockFlowNode, getBuiltInFunction: (name: s
         }
         const code = nodes.map((node) => emitJITCode(node)).join("\n");
         // @ts-ignore
-        const jitFunction = new AsyncFunction("{ local, args, env }", "helper", code);
+        const jitFunction = new AsyncFunction("scope", "helper", code);
         addNode(nodes[0].id, (scope) => jitFunction(scope, {
             builtIn: builtInFunctions,
         }));
